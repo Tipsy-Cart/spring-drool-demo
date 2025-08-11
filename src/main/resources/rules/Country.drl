@@ -1,0 +1,110 @@
+package rules.country
+
+import com.demo.bean.Address;
+import com.demo.bean.Buyer;
+import com.demo.bean.Country;
+import com.demo.bean.Identification;
+import com.demo.bean.Invoice;
+import com.demo.bean.Registration;
+import com.demo.bean.Supplier;
+
+global com.demo.bean.ValidationResult results;
+
+dialect "java"
+
+rule "Supplier is Mandatory"
+when
+    Invoice(null == supplier)
+then
+   results.put("Invoice.supplier", "Supplier is mandatory");
+end
+
+rule "Insert Supplier into working memory"
+when
+    $invoice : Invoice(null != supplier)
+then
+   insert($invoice.getSupplier());
+end
+
+rule "Buyer is Mandatory"
+when
+    Invoice(null == buyer)
+then
+   results.put("Invoice.buyer", "Buyer is mandatory");
+end
+
+rule "Insert Buyer into working memory"
+when
+    $invoice : Invoice(null != buyer)
+then
+   insert($invoice.getBuyer());
+end
+
+rule "Supplier Registration is Mandatory"
+when
+    Supplier(null == registration)
+then
+   results.put("Invoice.supplier.registrationName", "Supplier Registration is mandatory");
+end
+
+rule "Insert Supplier Registration in working memory"
+when
+    $supplier : Supplier(null != registration)
+then
+   insert($supplier.getRegistration())
+end
+
+rule "Supplier Registration Legal Name is mandatory"
+when
+    $registration : Registration(null == legalName || legalName.trim() == "")
+then
+   results.put("Invoice.supplier.registration.legalName", "Supplier Registration Legal Name Can not be null or empty");
+end
+
+rule "Supplier Registration Legal Name max length is 20"
+when
+    $registration : Registration(null != legalName || legalName.length() > 20)
+then
+   results.put("Invoice.supplier.registration.legalName", "Supplier Registration Legal Name Can not be greater than 20 Characters");
+end
+
+rule "Supplier Registration Trade Name is mandatory"
+when
+    $registration : Registration(null == tradeName || tradeName.trim() == "")
+then
+   results.put("Invoice.supplier.registration.tradeName", "Supplier Registration Trade Name Can not be null or empty");
+end
+
+rule "Supplier Registration tradeName Name max length is 10"
+when
+    $registration : Registration(null != tradeName || tradeName.length() > 10)
+then
+   results.put("Invoice.supplier.registration.tradeName", "Supplier Registration tradeName Name Can not be greater than 20 Characters");
+   retract($registration);
+end
+
+rule "Insert Buyer Registration in working memory"
+when
+    $buyer : Buyer(null != registration)
+then
+   insert($buyer.getRegistration())
+end
+
+
+
+rule "Supplier Address is Mandatory"
+when
+    Supplier(null == address)
+then
+   results.put("Invoice.supplier.address", "Supplier address is mandatory");
+end
+
+rule "Insert Supplier Address in working memory"
+when
+    $supplier : Supplier(null != address)
+then
+   insert($supplier.getAddress())
+end
+
+
+

@@ -1,0 +1,20 @@
+
+import com.demo.bean.Country;
+global com.demo.bean.ValidationResult results;
+
+template header
+id
+condition
+action
+
+template "template_demo"
+
+rule "@{id}"
+  dialect "java"
+  when
+    @{condition};
+  then
+    @{action};
+end
+
+end template
