@@ -1,4 +1,4 @@
-package com.demo.beanTwo;
+package com.demo.bean;
 
 public enum CellIndexMap {
     invType(2),supTin(11),buyerElectronicAddress(26);
