@@ -1,14 +1,14 @@
 package rules.country
 
-import com.demo.bean.Address;
-import com.demo.bean.Buyer;
-import com.demo.bean.Country;
-import com.demo.bean.Identification;
-import com.demo.bean.Invoice;
-import com.demo.bean.Registration;
-import com.demo.bean.Supplier;
+import com.demo.beanOne.Address;
+import com.demo.beanOne.Buyer;
+import com.demo.beanOne.Country;
+import com.demo.beanOne.Identification;
+import com.demo.beanOne.Invoice;
+import com.demo.beanOne.Registration;
+import com.demo.beanOne.SupplierDetail;
 
-global com.demo.bean.ValidationResult results;
+global com.demo.beanOne.ValidationResult results;
 
 dialect "java"
 
@@ -42,14 +42,14 @@ end
 
 rule "Supplier Registration is Mandatory"
 when
-    Supplier(null == registration)
+    SupplierDetail(null == registration)
 then
    results.put("Invoice.supplier.registrationName", "Supplier Registration is mandatory");
 end
 
 rule "Insert Supplier Registration in working memory"
 when
-    $supplier : Supplier(null != registration)
+    $supplier : SupplierDetail(null != registration)
 then
    insert($supplier.getRegistration())
 end
@@ -94,14 +94,14 @@ end
 
 rule "Supplier Address is Mandatory"
 when
-    Supplier(null == address)
+    SupplierDetail(null == address)
 then
    results.put("Invoice.supplier.address", "Supplier address is mandatory");
 end
 
 rule "Insert Supplier Address in working memory"
 when
-    $supplier : Supplier(null != address)
+    $supplier : SupplierDetail(null != address)
 then
    insert($supplier.getAddress())
 end

@@ -1,6 +1,6 @@
 
-import com.demo.bean.Country;
-global com.demo.bean.ValidationResult results;
+import com.jayway.jsonpath.DocumentContext;
+global com.demo.beanOne.ValidationResult results;
 
 template header
 id
@@ -12,9 +12,9 @@ template "template_demo"
 rule "@{id}"
   dialect "java"
   when
-    @{condition};
+    @{condition}
   then
-    @{action};
+    @{action}
 end
 
 end template

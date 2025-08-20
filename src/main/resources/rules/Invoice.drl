@@ -1,0 +1,20 @@
+package rules.Invoice
+
+import com.jayway.jsonpath.DocumentContext;
+
+global com.demo.beanOne.ValidationResult results;
+
+dialect "java"
+
+rule "Invoice Number is Mandatory"
+when
+    $ctx : DocumentContext()
+    $invNum : String() from $ctx.read("$.invNum", String.class)
+    eval( $invNum == null || $invNum.isEmpty())
+then
+   results.put("Invoice.InvoiceNumber", "Invoice Number is Mandatory");
+end
+
+
+
+

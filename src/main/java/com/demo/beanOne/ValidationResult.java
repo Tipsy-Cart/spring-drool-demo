@@ -1,4 +1,4 @@
-package com.demo.bean;
+package com.demo.beanOne;
 
 import java.util.HashMap;
 import java.util.Map;
