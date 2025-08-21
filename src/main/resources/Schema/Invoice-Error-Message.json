@@ -1,0 +1,74 @@
+{
+  "$.invNum|required": {
+    "field" : "invNum",
+    "message" : "Invoice Number is Mandatory"
+  },
+  "$.invNum|minLength": {
+    "field" : "invNum",
+    "message" : "Invoice Number Can not be Empty"
+  },
+  "$.invNum|pattern": {
+    "field" : "invNum",
+    "message" : "Invoice Number Can not be Empty"
+  },
+  "$.invNum|maxLength": {
+    "field" : "invNum",
+    "message" : "Invoice Number Can not be more than 12 characters"
+  },
+  "$.invDate|required": {
+    "field" : "invDate",
+    "message" : "Invoice Date is Mandatory"
+  },
+  "$.invDate|format": {
+    "field" : "invDate",
+    "message" : "Invalid Invoice Date"
+  },
+  "$.invType|required": {
+    "field" : "invType",
+    "message" : "Invoice Type is Mandatory"
+  },
+  "$.invType|enum": {
+    "field" : "invType",
+    "message" : "Please provide valid Invoice Type from masters"
+  },
+  "$.supRegistrationType|required": {
+    "field" : "supRegistrationType",
+    "message" : "Supplier Registration Type is Mandatory"
+  },
+  "$.supRegistrationType|enum": {
+    "field" : "supRegistrationType",
+    "message" : "Please provide valid Supplier Registration Type from masters"
+  },
+  "$.supPassportIssuingCountry|required": {
+    "field" : "supRegistrationType",
+    "message" : "Passport issuing country is required when Supplier Registration Type is PASSPORT"
+  },
+  "$.items|required": {
+    "field" : "items",
+    "message" : "Items is Mandatory"
+  },
+  "$.items|minItems": {
+    "field" : "items",
+    "message" : "Please provide at least one item"
+  },
+  "$.items[%d].id|required": {
+    "field" : "items[%d].id",
+    "message" : "Item id is mandatory"
+  },
+  "$.items[%d].taxes|minItems": {
+    "field" : "items[%d].taxes",
+    "message" : "At least provide one Tax"
+  },
+  "$.items[%d].taxes[%d].code|required": {
+    "field" : "items[%d].taxes[%d].code",
+    "message" : "Tax Code is mandatory"
+  },
+  "$.items[%d].taxes[%d].taxRate|required": {
+    "field" : "items[%d].taxes[%d].taxRate",
+    "message" : "Tax rate is mandatory"
+  },
+  "$.items[%d].taxes[%d].taxAmount|required": {
+    "field" : "items[%d].taxes[%d].taxAmount",
+    "message" : "Tax Amount is mandatory"
+  }
+}

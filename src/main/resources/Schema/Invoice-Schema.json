@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Invoice",
+  "type": "object",
+  "properties": {
+    "invNum": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 12,
+      "pattern": "^(?!\\s*$).+"
+    },
+    "invDate": {
+      "type": "string",
+      "format": "custom-date"
+    },
+    "invType": {
+      "type": "string",
+      "enum": ["380","381","382"]
+    },
+    "supRegistrationType": {
+      "type": "string",
+      "enum": ["PASSPORT","EID"]
+    },
+    "supPassportIssuingCountry": {
+      "type": "string",
+      "enum": ["UAE","INDIA"]
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "properties": {
+          "id":{
+            "type": "string"
+          },
+          "code":{
+            "type": "string"
+          },
+          "name":{
+            "type": "string"
+          },
+          "price":{
+            "type": "number"
+          },
+          "discount":{
+            "type": "string"
+          },
+          "netPrice":{
+            "type": "number"
+          },
+          "quantity":{
+            "type": "number"
+          },
+          "itemCharge":{
+            "type": "number"
+          },
+          "itemAllowance":{
+            "type": "number"
+          },
+          "taxableAmount":{
+            "type": "number"
+          },
+          "itemTotalTax":{
+            "type": "number"
+          },
+          "itemTotalAmount":{
+            "type": "number"
+          },
+          "taxes" : {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "taxRate":{
+                  "type": "number"
+                },
+                "taxAmount":{
+                  "type": "number"
+                }
+              },
+              "required": ["code","taxRate","taxAmount"]
+            }
+          }
+        }
+      }
+    }
+  },
+  "if": {
+    "properties": {
+      "supRegistrationType" : {"const": "PASSPORT"}
+    }
+  },
+  "then": {
+    "required": ["supPassportIssuingCountry"]
+  },
+  "required": ["invNum", "invDate", "invType", "supRegistrationType", "items"],
+  "additionalProperties": false
+}

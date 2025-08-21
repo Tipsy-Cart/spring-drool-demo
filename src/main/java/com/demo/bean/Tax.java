@@ -4,5 +4,9 @@ import lombok.Data;
 
 @Data
 public class Tax {
+
     private String code;
+    private Double taxRate;
+    private Double taxAmount;
+
 }
