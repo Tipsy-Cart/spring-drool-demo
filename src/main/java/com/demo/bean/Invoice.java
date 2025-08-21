@@ -21,5 +21,6 @@ public class Invoice {
     private String invType;
     private String supRegistrationType;
     private String supPassportIssuingCountry;
+    private Item item;
 
 }

@@ -11,13 +11,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 @RestController
 public class JSONValidator {
 
     @PostMapping(value = "/json")
-    public Set<ValidationMessage> validate(@RequestBody Invoice invoice) throws IOException {
+    public Map<String, String> validate(@RequestBody Invoice invoice) throws IOException {
         try (InputStream schemaStream = JsonSchemaIdValidator.class
                 .getClassLoader()
                 .getResourceAsStream("Invoice-Schema.json")){
@@ -29,7 +31,19 @@ public class JSONValidator {
             JsonSchemaFactory jsonSchemaFactory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V202012);
             JsonSchema schema = jsonSchemaFactory.getSchema(schemaStream, config);
             Set<ValidationMessage> validationMessages = schema.validate(jsonNode);
-            return validationMessages;
+            Map<String, String> errors = new HashMap<>();
+            validationMessages.forEach(vm -> {
+                String location = vm.getInstanceLocation().toString().substring(1);
+                String property = vm.getProperty();
+                String type = vm.getType();
+                String message = "";
+                if(type.equals("required"))
+                    message = String.format("%s is mandatory", location+property);
+                if(type.equals("enum"))
+                    message = String.format("%s should be from master", location+property);
+                errors.put(location+property, message);
+            });
+            return errors;
         }catch (Exception e){
             e.printStackTrace();
             throw e;

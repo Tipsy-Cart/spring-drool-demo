@@ -24,6 +24,21 @@
     "supPassportIssuingCountry": {
       "type": "string",
       "enum": ["UAE","INDIA"]
+    },
+    "item": {
+      "type": "object",
+      "properties": {
+        "tax": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string"
+            }
+          },
+          "required": ["code"]
+        }
+      },
+      "required": ["tax"]
     }
   },
   "if": {
@@ -34,6 +49,6 @@
   "then": {
     "required": ["supPassportIssuingCountry"]
   },
-  "required": ["invNum", "invDate", "invType", "supRegistrationType"],
+  "required": ["invNum", "invDate", "invType", "supRegistrationType", "item"],
   "additionalProperties": false
 }
