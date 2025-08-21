@@ -18,6 +18,6 @@ public class Invoice {
     private String invType;
     private String supRegistrationType;
     private String supPassportIssuingCountry;
-    private List<Item> items;
+    private List<Item> lineItems;
 
 }

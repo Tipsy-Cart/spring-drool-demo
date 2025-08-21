@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,16 +34,32 @@ public class KieBaseManager {
     private KieBase loadKieBase(String id) {
         List<Rule> rules = ruleLoader.loadRules(id);
         ObjectDataCompiler compiler = new ObjectDataCompiler();
-        Resource resource = resourceLoader.getResource("classpath:rules/template.drt");
-        InputStream templateInputStream = null;
+        Resource resource = resourceLoader.getResource("classpath:rules/" + id + ".drl");
+        InputStream ruleInputStream = null;
+        String drl = null;
         try {
-            templateInputStream = resource.getInputStream();
+            ruleInputStream = resource.getInputStream();
+            drl = new String(ruleInputStream.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
-        String drl = compiler.compile(rules, templateInputStream);
         return new KieHelper().addContent(drl, ResourceType.DRL).build();
     }
+
+//    private KieBase loadKieBase(String id) {
+//        List<Rule> rules = ruleLoader.loadRules(id);
+//        ObjectDataCompiler compiler = new ObjectDataCompiler();
+//        Resource resource = resourceLoader.getResource("classpath:rules/template.drt");
+//        InputStream templateInputStream = null;
+//        try {
+//            templateInputStream = resource.getInputStream();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//        String drl = compiler.compile(rules, templateInputStream);
+//        return new KieHelper().addContent(drl, ResourceType.DRL).build();
+//    }
 
 }

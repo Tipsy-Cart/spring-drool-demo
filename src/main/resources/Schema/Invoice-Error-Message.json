@@ -9,7 +9,7 @@
   },
   "$.invNum|pattern": {
     "field" : "invNum",
-    "message" : "Invoice Number Can not be Empty"
+    "message" : "Invoice Number Can not have only white spaces"
   },
   "$.invNum|maxLength": {
     "field" : "invNum",
@@ -21,7 +21,7 @@
   },
   "$.invDate|format": {
     "field" : "invDate",
-    "message" : "Invalid Invoice Date"
+    "message" : "Invoice Date must be in YYYY-MM-DD format"
   },
   "$.invType|required": {
     "field" : "invType",

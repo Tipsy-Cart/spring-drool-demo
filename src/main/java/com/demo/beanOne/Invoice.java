@@ -45,7 +45,6 @@ public class Invoice {
     @ExcelCellName("Invoicing Period End Date")
     private String endDate;
 
-
     @ExcelCellName("Seller Name")
     private String supName;
 
