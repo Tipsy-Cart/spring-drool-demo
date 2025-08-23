@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DroolsConfig {
 
-    private static final String RULES_COUNTRY_RULES_DRL = "rules/Invoice.drl";
+    private static final String RULES_COUNTRY_RULES_DRL = "rules/Tax.drl";
     private static final KieServices kieServices = KieServices.Factory.get();
 
     @Bean

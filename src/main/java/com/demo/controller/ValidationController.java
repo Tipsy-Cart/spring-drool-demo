@@ -35,29 +35,43 @@ public class ValidationController {
     }
 
     @PostMapping("/validate")
-    public Map<String, String> validate(@RequestParam String id, @RequestBody Invoice invoice) throws JsonProcessingException {
+    public Map<String, String> validate(@RequestParam String id, @RequestParam(required = false) List<String> groups, @RequestBody Invoice invoice) throws JsonProcessingException {
         ValidationResult results = new ValidationResult();
         KieBase kieBase = kieBaseManager.get(id);
         KieSession kieSession = kieBase.newKieSession();
-//        kieSession.addEventListener(new DebugAgendaEventListener());
-//        kieSession.addEventListener(new DebugRuleRuntimeEventListener());
         kieSession.setGlobal("results", results);
         kieSession.setGlobal("jsonHelper", new JsonHelper());
         ObjectMapper mapper = new ObjectMapper();
         String invoiceJson = mapper.writeValueAsString(invoice);
         DocumentContext invoiceCtx = JsonPath.using(config).parse(invoiceJson);
         kieSession.insert(invoiceCtx);
-        kieSession.getAgenda().getAgendaGroup("Tax").setFocus();
-        kieSession.fireAllRules();
-        if(!results.get().isEmpty()){
-            kieSession.dispose();
-            return results.get();
+        if(null != groups && !groups.isEmpty()){
+            for(int i = 0; i < groups.size(); i++){
+                kieSession.getAgenda().getAgendaGroup(groups.get(i)).setFocus();
+                kieSession.fireAllRules();
+                if(!results.get().isEmpty()){
+                    kieSession.dispose();
+                    break;
+                }
+            }
         }
-        kieSession.getAgenda().getAgendaGroup("LineItem").setFocus();
-        kieSession.fireAllRules();
-        kieSession.dispose();
         return results.get();
     }
 
+    /*@PostMapping("/validate")
+    public Map<String, String> validate(@RequestParam String id, @RequestBody Invoice invoice) throws JsonProcessingException {
+        ValidationResult results = new ValidationResult();
+        KieBase kieBase = kieBaseManager.get(id);
+        KieSession kieSession = kieBase.newKieSession();
+        kieSession.setGlobal("results", results);
+        kieSession.setGlobal("jsonHelper", new JsonHelper());
+        ObjectMapper mapper = new ObjectMapper();
+        String invoiceJson = mapper.writeValueAsString(invoice);
+        DocumentContext invoiceCtx = JsonPath.using(config).parse(invoiceJson);
+        kieSession.insert(invoiceCtx);
+        kieSession.fireAllRules();
+        kieSession.dispose();
+        return results.get();
+    }*/
 
 }

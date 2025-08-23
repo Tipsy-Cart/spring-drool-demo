@@ -16,11 +16,9 @@ public class Item {
     private Double quantity;
     private Double itemCharge;
     private Double itemAllowance;
-    private Double taxableAmount;
+    private Double itemTaxableAmount;
     private Double itemTotalTax;
     private Double itemTotalAmount;
-    private Double prepaidAmount;
-    private Double totalPayableAmount;
     private List<Tax> taxes;
 
 }

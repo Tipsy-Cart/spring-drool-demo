@@ -17,6 +17,7 @@ when
     $lineItems : List() from collect (Object() from jsonHelper.readList($invoiceCtx,"$.lineItems"))
 then
     for(int i = 0; i<$lineItems.size(); i++) {
+        jsonHelper.log("Tax : Adding Line Item " + i);
         DocumentContext itemCtx = jsonHelper.parse($lineItems.get(i));
         insert(new JsonFact("LineItem",i,itemCtx));
     }
@@ -31,6 +32,7 @@ when
     $taxes : List() from collect (Object() from jsonHelper.readList($itemCtx, "$.taxes"))
 then
    for(int i = 0; i<$taxes.size(); i++) {
+           jsonHelper.log("Tax : Adding Tax" + i);
            DocumentContext tacCtx = jsonHelper.parse($taxes.get(i));
            insert(new JsonFact("Tax",i,tacCtx,$itemFact));
        }
@@ -48,6 +50,7 @@ when
     $itemTaxableAmount : Double() from jsonHelper.readDouble($itemCtx,"$.itemTaxableAmount")
     $taxRate : Double() from jsonHelper.readDouble($taxCtx,"$.taxRate")
     $taxAmount : Double() from jsonHelper.readDouble($taxCtx,"$.taxAmount")
+    eval(jsonHelper.log("LineItem : " + $itemIndex + " Tax " + $taxIndex + " Taxable Amount " + $itemTaxableAmount + " Tax Rate " + $taxRate + " Tax Amount " + $taxAmount))
     eval(!$taxAmount.equals($itemTaxableAmount * $taxRate / 100))
 then
    results.put("lineItem[" + $itemIndex + "].tax[" + $taxIndex + "].taxAmount", "Incorrect Tax Amount");
@@ -62,6 +65,7 @@ when
     $price : Double() from jsonHelper.readDouble($itemCtx,"$.price")
     $discount : Double() from jsonHelper.readDouble($itemCtx,"$.discount")
     $netPrice : Double() from jsonHelper.readDouble($itemCtx,"$.netPrice")
+    eval(jsonHelper.log("LineItem : " + $itemIndex + " Net Price " + $netPrice + " Discount " + $discount + " Price " + $price))
     eval(!$netPrice.equals($price - $discount))
 then
    results.put("lineItem[" + $itemIndex + "].netPrice ", "Incorrect Net Price");
@@ -78,6 +82,7 @@ when
     $itemCharge : Double() from jsonHelper.readDouble($itemCtx,"$.itemCharge")
     $itemAllowance : Double() from jsonHelper.readDouble($itemCtx,"$.itemAllowance")
     $itemTaxableAmount : Double() from jsonHelper.readDouble($itemCtx,"$.itemTaxableAmount")
+    eval(jsonHelper.log("LineItem : " + $itemIndex + " Net Price " + $netPrice + " Quantity " + $quantity + " Charge " + $itemCharge + " Allowance " + $itemAllowance + " Taxable Amount " + $itemTaxableAmount))
     eval(!$itemTaxableAmount.equals(($netPrice * $quantity) + $itemCharge - $itemAllowance))
 then
    results.put("lineItem[" + $itemIndex + "].taxableAmount ", "Incorrect Taxable Amount");
@@ -92,6 +97,7 @@ when
     $itemTotalTax : Double() from jsonHelper.readDouble($itemCtx,"$.itemTotalTax")
     $taxAmountList : List() from collect (Object() from jsonHelper.readList($itemCtx, "$.taxes[*].taxAmount"))
     $taxAmountSum : Double() from jsonHelper.sum($taxAmountList)
+    eval(jsonHelper.log("LineItem : " + $itemIndex + " Total Tax " + $itemTotalTax))
     eval(!$itemTotalTax.equals($taxAmountSum))
 then
    results.put("lineItem[" + $itemIndex + "].itemTotalTax ", "Incorrect Total Tax Amount");
@@ -106,6 +112,7 @@ when
     $itemTaxableAmount : Double() from jsonHelper.readDouble($itemCtx,"$.itemTaxableAmount")
     $itemTotalTax : Double() from jsonHelper.readDouble($itemCtx,"$.itemTotalTax")
     $itemTotalAmount : Double() from jsonHelper.readDouble($itemCtx,"$.itemTotalAmount")
+    eval(jsonHelper.log("LineItem : " + $itemIndex + " Taxable Amount " + $itemTaxableAmount + " Total Tax " + $itemTotalTax + " Total Amount " + $itemTotalAmount))
     eval(!$itemTotalAmount.equals($itemTaxableAmount + $itemTotalTax))
 then
    results.put("lineItem[" + $itemIndex + "].itemTotalAmount ", "Incorrect Item Total Amount");
@@ -118,6 +125,7 @@ when
     $totalTaxableAmount : Double() from jsonHelper.readDouble($invoiceCtx,"$.totalTaxableAmount")
     $itemTaxableAmountList : List() from collect (Object() from jsonHelper.readList($invoiceCtx, "$.lineItems[*].itemTaxableAmount"))
     $itemTaxableAmountSum : Double() from jsonHelper.sum($itemTaxableAmountList)
+    eval(jsonHelper.log("Invoice : Total Taxable Amount " + $totalTaxableAmount))
     eval(!$totalTaxableAmount.equals($itemTaxableAmountSum))
 then
    results.put("totalTaxableAmount", "Incorrect Total Taxable Amount");
@@ -130,6 +138,7 @@ when
     $totalTaxAmount : Double() from jsonHelper.readDouble($invoiceCtx,"$.totalTaxAmount")
     $itemTotalTaxList : List() from collect (Object() from jsonHelper.readList($invoiceCtx, "$.lineItems[*].itemTotalTax"))
     $itemTotalTaxSum : Double() from jsonHelper.sum($itemTotalTaxList)
+    eval(jsonHelper.log("Invoice : Total Tax Amount " + $totalTaxAmount ))
     eval(!$totalTaxAmount.equals($itemTotalTaxSum))
 then
    results.put("totalTaxAmount", "Incorrect Total Tax Amount");
@@ -142,6 +151,7 @@ when
     $totalAmount : Double() from jsonHelper.readDouble($invoiceCtx,"$.totalAmount")
     $itemTotalAmountList : List() from collect (Object() from jsonHelper.readList($invoiceCtx, "$.lineItems[*].itemTotalAmount"))
     $itemTotalAmountSum : Double() from jsonHelper.sum($itemTotalAmountList)
+    eval(jsonHelper.log("Invoice : Total Amount " + $totalAmount))
     eval(!$totalAmount.equals($itemTotalAmountSum))
 then
    results.put("totalAmount", "Incorrect Total Amount");
@@ -154,6 +164,7 @@ when
     $totalAmount : Double() from jsonHelper.readDouble($invoiceCtx,"$.totalAmount")
     $prepaidAmount : Double() from jsonHelper.readDouble($invoiceCtx,"$.prepaidAmount")
     $totalPayableAmount : Double() from jsonHelper.readDouble($invoiceCtx,"$.totalPayableAmount")
+    eval(jsonHelper.log("Invoice : Total Amount " + $totalAmount + " Prepaid Amount " + $prepaidAmount + " Total Payable Amount " + $totalPayableAmount))
     eval(!$totalPayableAmount.equals($totalAmount - $prepaidAmount))
 then
    results.put("totalPayableAmount", "Incorrect Total Payable Amount");

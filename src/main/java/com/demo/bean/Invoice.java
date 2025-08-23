@@ -18,6 +18,11 @@ public class Invoice {
     private String invType;
     private String supRegistrationType;
     private String supPassportIssuingCountry;
+    private Double totalTaxableAmount;
+    private Double totalTaxAmount;
+    private Double totalAmount;
+    private Double prepaidAmount;
+    private Double totalPayableAmount;
     private List<Item> lineItems;
 
 }

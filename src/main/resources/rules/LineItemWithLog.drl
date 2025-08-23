@@ -16,6 +16,7 @@ when
     $lineItems : List() from collect (Object() from jsonHelper.readList($invoiceCtx,"$.lineItems"))
 then
     for(int i = 0; i<$lineItems.size(); i++) {
+        jsonHelper.log("LineItem : Adding Line Item " + i);
         DocumentContext itemCtx = jsonHelper.parse($lineItems.get(i));
         insert(new JsonFact("LineItem",i,itemCtx));
     }
@@ -29,6 +30,7 @@ when
     $price : Double() from jsonHelper.readDouble($itemCtx,"$.price")
     $discount : Double() from jsonHelper.readDouble($itemCtx,"$.discount")
     $netPrice : Double() from jsonHelper.readDouble($itemCtx,"$.netPrice")
+    eval(jsonHelper.log("LineItem : " + $itemIndex + " Net Price " + $netPrice + " Discount " + $discount + " Price " + $price))
     eval(!$netPrice.equals($price - $discount))
 then
    results.put("lineItem[" + $itemIndex + "].netPrice ", "Incorrect net price");
@@ -44,6 +46,7 @@ when
     $itemCharge : Double() from jsonHelper.readDouble($itemCtx,"$.itemCharge")
     $itemAllowance : Double() from jsonHelper.readDouble($itemCtx,"$.itemAllowance")
     $taxableAmount : Double() from jsonHelper.readDouble($itemCtx,"$.taxableAmount")
+    eval(jsonHelper.log("LineItem : " + $itemIndex + " Net Price " + $netPrice + " Quantity " + $quantity + " Charge " + $itemCharge + " Allowance " + $itemAllowance + " Taxable Amount " + $taxableAmount))
     eval(!$taxableAmount.equals(($netPrice * $quantity) + $itemCharge - $itemAllowance))
 then
    results.put("lineItem[" + $itemIndex + "].taxableAmount ", "Incorrect taxable amount");
@@ -57,6 +60,7 @@ when
     $itemTotalTax : Double() from jsonHelper.readDouble($itemCtx,"$.itemTotalTax")
     $taxAmounts : List() from collect (Object() from jsonHelper.readList($itemCtx, "$.taxes[*].taxAmount"))
     $totalTax : Double() from jsonHelper.sum($taxAmounts)
+    eval(jsonHelper.log("LineItem : " + $itemIndex + " Total Tax " + $totalTax))
     eval(!$itemTotalTax.equals($totalTax))
 then
    results.put("lineItem[" + $itemIndex + "].itemTotalTax ", "Incorrect total tax amount");

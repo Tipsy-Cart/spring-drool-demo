@@ -1,0 +1,58 @@
+package rules.Invoice
+
+import com.demo.controller.JsonFact
+import com.jayway.jsonpath.DocumentContext;
+import java.util.List;
+import com.jayway.jsonpath.JsonPath;
+
+global com.demo.beanOne.ValidationResult results;
+global com.demo.controller.JsonHelper jsonHelper;
+
+dialect "java"
+
+rule "Extract Line Items for Tax"
+when
+    $invoiceCtx : DocumentContext()
+    $lineItems : List() from collect (Object() from jsonHelper.readList($invoiceCtx,"$.lineItems"))
+then
+    for(int i = 0; i<$lineItems.size(); i++) {
+        jsonHelper.log("Tax : Adding Line Item " + i);
+        DocumentContext itemCtx = jsonHelper.parse($lineItems.get(i));
+        insert(new JsonFact("LineItem",i,itemCtx));
+    }
+end
+
+rule "Extract Taxes"
+when
+    $itemFact : JsonFact(type == "LineItem")
+    $itemCtx : DocumentContext() from $itemFact.getContext()
+    $itemIndex : Integer() from $itemFact.getIndex()
+    $taxes : List() from collect (Object() from jsonHelper.readList($itemCtx, "$.taxes"))
+then
+   for(int i = 0; i<$taxes.size(); i++) {
+           jsonHelper.log("Tax : Adding Tax" + i);
+           DocumentContext tacCtx = jsonHelper.parse($taxes.get(i));
+           insert(new JsonFact("Tax",i,tacCtx,$itemFact));
+       }
+end
+
+rule "Tax Amount Check"
+when
+    $taxFact : JsonFact(type == "Tax")
+    $taxCtx : DocumentContext() from $taxFact.getContext()
+    $taxIndex : Integer() from $taxFact.getIndex()
+    $itemFact : JsonFact() from $taxFact.getJsonFact()
+    $itemCtx : DocumentContext() from $itemFact.getContext()
+    $itemIndex : Integer() from $itemFact.getIndex()
+    $taxableAmount : Double() from jsonHelper.readDouble($itemCtx,"$.taxableAmount")
+    $taxRate : Double() from jsonHelper.readDouble($taxCtx,"$.taxRate")
+    $taxAmount : Double() from jsonHelper.readDouble($taxCtx,"$.taxAmount")
+    eval(jsonHelper.log("LineItem : " + $itemIndex + " Tax " + $taxIndex + " Taxable Amount " + $taxableAmount + " Tax Rate " + $taxRate + " Tax Amount " + $taxAmount))
+    eval(!$taxAmount.equals($taxableAmount * $taxRate / 100))
+then
+   results.put("lineItem[" + $itemIndex + "].tax[" + $taxIndex + "].taxAmount", "Incorrect tax amount");
+end
+
+
+
+
