@@ -1,0 +1,137 @@
+package rules.Invoice
+
+import com.demo.controller.JsonFact
+import com.jayway.jsonpath.DocumentContext;
+import java.util.List;
+import com.jayway.jsonpath.JsonPath;
+
+global com.demo.beanOne.ValidationResult results;
+global com.demo.controller.JsonHelper jsonHelper;
+
+dialect "java"
+
+rule "Extract Line Items for Tax"
+agenda-group "Tax"
+when
+    $invoiceCtx : DocumentContext()
+    $lineItems : List() from collect (Object() from jsonHelper.readList($invoiceCtx,"$.lineItems"))
+then
+    for(int i = 0; i<$lineItems.size(); i++) {
+        DocumentContext itemCtx = jsonHelper.parse($lineItems.get(i));
+        insertLogical(new JsonFact("LineItem",i,itemCtx));
+    }
+end
+
+rule "Extract Taxes"
+agenda-group "Tax"
+when
+    $itemFact : JsonFact(type == "LineItem")
+    $itemCtx : DocumentContext() from $itemFact.getContext()
+    $taxes : List() from collect (Object() from jsonHelper.readList($itemCtx, "$.taxes"))
+then
+   for(int i = 0; i<$taxes.size(); i++) {
+           DocumentContext tacCtx = jsonHelper.parse($taxes.get(i));
+           insertLogical(new JsonFact("Tax",i,tacCtx));
+       }
+end
+
+rule "Tax Amount Check"
+agenda-group "Tax"
+when
+    $itemFact : JsonFact(type == "LineItem")
+    $itemCtx : DocumentContext() from $itemFact.getContext()
+    $itemIndex : Integer() from $itemFact.getIndex()
+    $taxFact : JsonFact(type == "Tax")
+    $taxCtx : DocumentContext() from $taxFact.getContext()
+    $taxIndex : Integer() from $taxFact.getIndex()
+    $taxableAmount : Double() from jsonHelper.readDouble($itemCtx,"$.taxableAmount")
+    $taxRate : Double() from jsonHelper.readDouble($taxCtx,"$.taxRate")
+    $taxAmount : Double() from jsonHelper.readDouble($taxCtx,"$.taxAmount")
+    eval(!$taxAmount.equals($taxableAmount * $taxRate / 100))
+then
+   results.put("lineItem[" + $itemIndex + "].tax[" + $taxIndex + "].taxAmount", "Incorrect tax amount");
+end
+
+rule "Extract Line Items"
+agenda-group "LineItem"
+when
+    $invoiceCtx : DocumentContext()
+    $lineItems : List() from collect (Object() from jsonHelper.readList($invoiceCtx,"$.lineItems"))
+then
+    for(int i = 0; i<$lineItems.size(); i++) {
+        DocumentContext itemCtx = jsonHelper.parse($lineItems.get(i));
+        insertLogical(new JsonFact("LineItem",i,itemCtx));
+    }
+end
+
+rule "Net Price Check"
+agenda-group "LineItem"
+when
+    $itemFact : JsonFact(type == "LineItem")
+    $itemCtx : DocumentContext() from $itemFact.getContext()
+    $itemIndex : Integer() from $itemFact.getIndex()
+    $price : Double() from jsonHelper.readDouble($itemCtx,"$.price")
+    $discount : Double() from jsonHelper.readDouble($itemCtx,"$.discount")
+    $netPrice : Double() from jsonHelper.readDouble($itemCtx,"$.netPrice")
+    eval(!$netPrice.equals($price - $discount))
+then
+   results.put("lineItem[" + $itemIndex + "].netPrice ", "Incorrect net price");
+end
+
+rule "Taxable Amount Check"
+agenda-group "LineItem"
+when
+    $itemFact : JsonFact(type == "LineItem")
+    $itemCtx : DocumentContext() from $itemFact.getContext()
+    $itemIndex : Integer() from $itemFact.getIndex()
+    $netPrice : Double() from jsonHelper.readDouble($itemCtx,"$.netPrice")
+    $quantity : Double() from jsonHelper.readDouble($itemCtx,"$.quantity")
+    $itemCharge : Double() from jsonHelper.readDouble($itemCtx,"$.itemCharge")
+    $itemAllowance : Double() from jsonHelper.readDouble($itemCtx,"$.itemAllowance")
+    $taxableAmount : Double() from jsonHelper.readDouble($itemCtx,"$.taxableAmount")
+    eval(!$taxableAmount.equals(($netPrice * $quantity) + $itemAllowance - $itemCharge))
+then
+   results.put("lineItem[" + $itemIndex + "].taxableAmount ", "Incorrect taxable amount");
+end
+
+rule "Total Tax Amount Check"
+agenda-group "LineItem"
+when
+    $itemFact : JsonFact(type == "LineItem")
+    $itemCtx : DocumentContext() from $itemFact.getContext()
+    $itemIndex : Integer() from $itemFact.getIndex()
+    $itemTotalTax : Double() from jsonHelper.readDouble($itemCtx,"$.itemTotalTax")
+    $taxAmounts : List() from collect (Object() from jsonHelper.readList($itemCtx, "$.taxes[*].taxAmount"))
+    $totalTax : Double() from jsonHelper.sum($taxAmounts)
+    eval(!$itemTotalTax.equals($totalTax))
+then
+   results.put("lineItem[" + $itemIndex + "].itemTotalTax ", "Incorrect total tax amount");
+end
+
+rule "Total Amount Check"
+agenda-group "LineItem"
+when
+    $itemFact : JsonFact(type == "LineItem")
+    $itemCtx : DocumentContext() from $itemFact.getContext()
+    $itemIndex : Integer() from $itemFact.getIndex()
+    $taxableAmount : Double() from jsonHelper.readDouble($itemCtx,"$.taxableAmount")
+    $itemTotalTax : Double() from jsonHelper.readDouble($itemCtx,"$.itemTotalTax")
+    $itemTotalAmount : Double() from jsonHelper.readDouble($itemCtx,"$.itemTotalAmount")
+    eval(!$itemTotalAmount.equals($taxableAmount + $itemTotalTax))
+then
+   results.put("lineItem[" + $itemIndex + "].itemTotalAmount ", "Incorrect item total amount");
+end
+
+rule "Total Payable Amount Check"
+agenda-group "LineItem"
+when
+    $itemFact : JsonFact(type == "LineItem")
+    $itemCtx : DocumentContext() from $itemFact.getContext()
+    $itemIndex : Integer() from $itemFact.getIndex()
+    $itemTotalAmount : Double() from jsonHelper.readDouble($itemCtx,"$.itemTotalAmount")
+    $prepaidAmount : Double() from jsonHelper.readDouble($itemCtx,"$.prepaidAmount")
+    $totalPayableAmount : Double() from jsonHelper.readDouble($itemCtx,"$.totalPayableAmount")
+    eval(!$totalPayableAmount.equals($itemTotalAmount - $prepaidAmount))
+then
+   results.put("lineItem[" + $itemIndex + "].totalPayableAmount ", "Incorrect Item Total Payable Amount");
+end

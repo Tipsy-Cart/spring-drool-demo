@@ -23,9 +23,32 @@ public class JSONValidator {
 
     private static final Pattern ARRAY_INDEX_PATTERN = Pattern.compile("\\[(\\d+)\\]");
 
+    @PostMapping(value = "/V1/json")
+    public Set<ValidationMessage> validateV1(@RequestBody Invoice invoice) throws IOException {
+        try (InputStream schemaStream = JsonSchemaIdValidator.class.getClassLoader().getResourceAsStream("Schema/Invoice-Schema.json");
+             InputStream errorStream = JsonSchemaIdValidator.class.getClassLoader().getResourceAsStream("Schema/Invoice-Error-Message.json");){
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+            JsonNode jsonNode = mapper.readTree(mapper.writeValueAsString(invoice));
+            SchemaValidatorsConfig config = new SchemaValidatorsConfig();
+            config.setFormatAssertionsEnabled(true);
+            Map<String, ValidationError> validationErrorMap = mapper.readValue(errorStream, new TypeReference<Map<String, ValidationError>>() {});
+            JsonMetaSchema metaSchema = JsonMetaSchema.builder(JsonMetaSchema.getV202012())
+                    .format(new CustomDateFormatValidator())
+                    .build();
+            JsonSchemaFactory jsonSchemaFactory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V202012, builder -> builder.metaSchema(metaSchema));
+            JsonSchema schema = jsonSchemaFactory.getSchema(schemaStream, config);
+            Set<ValidationMessage> validationMessages = schema.validate(jsonNode);
+            return validationMessages;
+        }catch (Exception e){
+            e.printStackTrace();
+            throw e;
+        }
+    }
 
-    @PostMapping(value = "/json")
-    public Map<String, String> validate(@RequestBody Invoice invoice) throws IOException {
+
+    @PostMapping(value = "/V2/json")
+    public Map<String, String> validateV2(@RequestBody Invoice invoice) throws IOException {
         try (InputStream schemaStream = JsonSchemaIdValidator.class.getClassLoader().getResourceAsStream("Schema/Invoice-Schema.json");
              InputStream errorStream = JsonSchemaIdValidator.class.getClassLoader().getResourceAsStream("Schema/Invoice-Error-Message.json");){
             ObjectMapper mapper = new ObjectMapper();

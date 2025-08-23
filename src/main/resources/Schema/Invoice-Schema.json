@@ -98,6 +98,6 @@
   "then": {
     "required": ["supPassportIssuingCountry"]
   },
-  "required": ["invNum", "invDate", "invType", "supRegistrationType", "items"],
+  "required": ["invNum", "invDate", "invType", "supRegistrationType", "lineItems"],
   "additionalProperties": false
 }

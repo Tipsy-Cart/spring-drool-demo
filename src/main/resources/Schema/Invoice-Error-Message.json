@@ -43,31 +43,31 @@
     "field" : "supRegistrationType",
     "message" : "Passport issuing country is required when Supplier Registration Type is PASSPORT"
   },
-  "$.items|required": {
+  "$.lineItems|required": {
     "field" : "items",
     "message" : "Items is Mandatory"
   },
-  "$.items|minItems": {
+  "$.lineItems|minItems": {
     "field" : "items",
     "message" : "Please provide at least one item"
   },
-  "$.items[%d].id|required": {
+  "$.lineItems[%d].id|required": {
     "field" : "items[%d].id",
     "message" : "Item id is mandatory"
   },
-  "$.items[%d].taxes|minItems": {
+  "$.lineItems[%d].taxes|minItems": {
     "field" : "items[%d].taxes",
     "message" : "At least provide one Tax"
   },
-  "$.items[%d].taxes[%d].code|required": {
+  "$.lineItems[%d].taxes[%d].code|required": {
     "field" : "items[%d].taxes[%d].code",
     "message" : "Tax Code is mandatory"
   },
-  "$.items[%d].taxes[%d].taxRate|required": {
+  "$.lineItems[%d].taxes[%d].taxRate|required": {
     "field" : "items[%d].taxes[%d].taxRate",
     "message" : "Tax rate is mandatory"
   },
-  "$.items[%d].taxes[%d].taxAmount|required": {
+  "$.lineItems[%d].taxes[%d].taxAmount|required": {
     "field" : "items[%d].taxes[%d].taxAmount",
     "message" : "Tax Amount is mandatory"
   }

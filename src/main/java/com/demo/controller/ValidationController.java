@@ -39,14 +39,21 @@ public class ValidationController {
         ValidationResult results = new ValidationResult();
         KieBase kieBase = kieBaseManager.get(id);
         KieSession kieSession = kieBase.newKieSession();
-        kieSession.addEventListener(new DebugAgendaEventListener());
-        kieSession.addEventListener(new DebugRuleRuntimeEventListener());
+//        kieSession.addEventListener(new DebugAgendaEventListener());
+//        kieSession.addEventListener(new DebugRuleRuntimeEventListener());
         kieSession.setGlobal("results", results);
         kieSession.setGlobal("jsonHelper", new JsonHelper());
         ObjectMapper mapper = new ObjectMapper();
         String invoiceJson = mapper.writeValueAsString(invoice);
         DocumentContext invoiceCtx = JsonPath.using(config).parse(invoiceJson);
         kieSession.insert(invoiceCtx);
+        kieSession.getAgenda().getAgendaGroup("Tax").setFocus();
+        kieSession.fireAllRules();
+        if(!results.get().isEmpty()){
+            kieSession.dispose();
+            return results.get();
+        }
+        kieSession.getAgenda().getAgendaGroup("LineItem").setFocus();
         kieSession.fireAllRules();
         kieSession.dispose();
         return results.get();

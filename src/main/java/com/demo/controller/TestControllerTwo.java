@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -25,6 +26,7 @@ public class TestControllerTwo {
     PoijiOptions invoiceOptions = PoijiOptions.PoijiOptionsBuilder.settings()
             .sheetIndex(0)
             .skip(2)
+            .limit(10)
             .build();
 
     PoijiOptions itemOptions = PoijiOptions.PoijiOptionsBuilder.settings()
@@ -43,6 +45,17 @@ public class TestControllerTwo {
             List<LineItem> lineItems = Poiji.fromExcel(file.getInputStream(), PoijiExcelType.XLSX, LineItem.class, itemOptions);
             List<Tax> taxes = Poiji.fromExcel(file.getInputStream(), PoijiExcelType.XLSX, Tax.class, taxOptions);
             return invoices.stream().map(invoice -> addLineItems(invoice, lineItems, taxes)).toList();
+    }
+
+    @PostMapping(value = "/upload/three", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public List<Invoice> stream(@RequestPart("file") MultipartFile file) throws IOException {
+        List<Invoice> invoices = new ArrayList<>();
+        Poiji.fromExcel(file.getInputStream(), PoijiExcelType.XLSX, Invoice.class, invoiceOptions, invoice -> {
+            invoices.add(invoice);
+        });
+        List<LineItem> lineItems = Poiji.fromExcel(file.getInputStream(), PoijiExcelType.XLSX, LineItem.class, itemOptions);
+        List<Tax> taxes = Poiji.fromExcel(file.getInputStream(), PoijiExcelType.XLSX, Tax.class, taxOptions);
+        return invoices.stream().map(invoice -> addLineItems(invoice, lineItems, taxes)).toList();
     }
 
     private Invoice addLineItems(Invoice invoice, List<LineItem> lineItems, List<Tax> taxes) {
